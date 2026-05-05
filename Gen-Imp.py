@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
 import pandas as pd
-from sklearn.metrics import auc
 
 def Calculategenimp(FM: ArrayLike, S: int, Tr: int = 11, Ts: int = 3):
     FM = np.array(FM)
