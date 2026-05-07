@@ -1,8 +1,8 @@
 import os
 import shutil
 
-source_folder = "data/originalimages_part1 (1)"
-destination_folder = "data"
+source_folder = "./originalimages_part1"
+destination_folder = "dst"
 
 for img_name in os.listdir(source_folder):
 
