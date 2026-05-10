@@ -8,34 +8,59 @@ face_cascade = cv.CascadeClassifier(
 
 IMG_SIZE = (128, 128)
 
+# CLAHE object
+clahe = cv.createCLAHE(
+    clipLimit=2.0,
+    tileGridSize=(8, 8)
+)
+
 
 def detect_and_preprocess(img):
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
+    # =========================
+    # BGR -> YCrCb
+    # =========================
+    ycrcb = cv.cvtColor(img, cv.COLOR_BGR2YCrCb)
+
+    # split channels
+    y, cr, cb = cv.split(ycrcb)
+
+    # =========================
+    # Enhance illumination
+    # =========================
+    y = clahe.apply(y)
+
+    # =========================
+    # Face Detection
+    # =========================
     faces = face_cascade.detectMultiScale(
-        gray,
-        scaleFactor=1.01,
-        minNeighbors=1,
+        y,
+        scaleFactor=1.0025,
+        minNeighbors=4,
         minSize=(50, 50)
     )
 
-    # لو مفيش وش → تجاهل الصورة
+    # no face found
     if len(faces) == 0:
         return None
-    # خد أكبر وجه (الأكثر احتمالًا يكون الأساسي)
-    x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
 
-    face = gray[y:y+h, x:x+w]
+    # largest face
+    x, y1, w, h = max(faces, key=lambda f: f[2] * f[3])
 
+    # crop face from enhanced Y channel
+    face = y[y1:y1+h, x:x+w]
+
+    # resize
     face = cv.resize(face, IMG_SIZE)
 
-    # normalization بسيط بدل الهستوجرام العنيف
+    # normalize
     face = face.astype(np.float32) / 255.0
 
     return face
 
 
 def load_and_preprocess(path):
+
     data = []
     labels = []
 
@@ -54,6 +79,7 @@ def load_and_preprocess(path):
         for img_name in os.listdir(person_path):
 
             img_path = os.path.join(person_path, img_name)
+
             img = cv.imread(img_path)
 
             if img is None:
@@ -61,8 +87,9 @@ def load_and_preprocess(path):
 
             face = detect_and_preprocess(img)
 
+            # skip if no face detected
             if face is None:
-                continue  # skip images without faces
+                continue
 
             data.append(face)
             labels.append(label)
@@ -80,7 +107,9 @@ if __name__ == "__main__":
     print("Sample label:", labels[0])
     print("Shape:", data[0].shape)
 
-    display = (data[11]*255).astype(np.uint8)
+    # display sample
+    display = (data[11]).astype(np.uint8)
+
     display = cv.resize(display, (600, 600))
 
     cv.imshow("Face Preprocessed", display)
