@@ -28,9 +28,5 @@ htmlcov/
 .vscode/
 data/
 datasets/
-*.bmp
-*.png
-*.jpg
-*.jpeg
 *.tif
 *.tiff
