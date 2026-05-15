@@ -21,18 +21,6 @@ def _detect_face_gray(gray: np.ndarray):
     face = cv.resize(face, IMG_SIZE)
     return face
 
-def detect_and_preprocess(img: np.ndarray) -> np.ndarray | None:
-    ycrcb = cv.cvtColor(img, cv.COLOR_BGR2YCrCb)
-    y, cr, cb = cv.split(ycrcb)
-    y = clahe.apply(y)
-
-    face = _detect_face_gray(y)
-    if face is None:
-        return None
-
-    return face.astype(np.float32) / 255.0
-
-
 def preprocess_hist_eq(img: np.ndarray) -> np.ndarray | None:
     if img is None:
         return None
